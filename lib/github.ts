@@ -18,16 +18,20 @@ type GitHubUserResponse = {
 
 export async function getGitHubProfile(): Promise<GitHubProfile | null> {
   const username = process.env.GITHUB_USERNAME?.trim();
-  if (!username) return null;
+  const token = process.env.GITHUB_TOKEN;
+  if (!username && !token) return null;
 
   const headers: HeadersInit = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const response = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}`, {
+    const endpoint = username
+      ? `/users/${encodeURIComponent(username)}`
+      : "/user";
+    const response = await fetch(`https://api.github.com${endpoint}`, {
       headers,
       next: { revalidate: 3600 },
     });

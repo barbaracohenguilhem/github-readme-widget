@@ -3,18 +3,20 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { PET_ASSETS } from "@/lib/assets";
+import type { PetAssets } from "@/lib/assets";
 import type { GitHubProfile } from "@/lib/github";
 import { INITIAL_PET, type PetState } from "@/lib/pet";
 
 type PetResponse = {
   pet: PetState;
   profile: GitHubProfile | null;
+  assets: PetAssets;
 };
 
 export default function Home() {
   const [pet, setPet] = useState(INITIAL_PET);
   const [profile, setProfile] = useState<GitHubProfile | null>(null);
+  const [assets, setAssets] = useState<PetAssets | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [imageFailed, setImageFailed] = useState(false);
@@ -28,6 +30,7 @@ export default function Home() {
       .then((data) => {
         setPet(data.pet);
         setProfile(data.profile);
+        setAssets(data.assets);
       })
       .catch(() => setMessage("Your cat is taking a little nap. Try again soon."))
       .finally(() => setLoading(false));
@@ -49,7 +52,7 @@ export default function Home() {
     setMessage(data.message);
   }
 
-  const catAsset = pet.mood === "sleeping" ? PET_ASSETS.sleepingCat : PET_ASSETS.awakeCat;
+  const catAsset = pet.mood === "sleeping" ? assets?.sleepingCat : assets?.awakeCat;
 
   return (
     <main className="page-shell">
@@ -79,7 +82,7 @@ export default function Home() {
           <div className={`pet-scene ${pet.mood}`}>
             <div className="sun-stamp" aria-hidden="true">✳</div>
             <div className="pet-art" aria-live="polite">
-              {!imageFailed ? (
+              {!imageFailed && catAsset ? (
                 <Image src={catAsset} alt={pet.mood === "sleeping" ? "Your cat is sleeping" : "Your cat is awake"} width={170} height={170} unoptimized onError={() => setImageFailed(true)} />
               ) : <span className="cat-emoji" role="img" aria-label={pet.mood === "sleeping" ? "Sleeping cat" : "Awake cat"}>{pet.mood === "sleeping" ? "😴🐈" : "🐈"}</span>}
             </div>

@@ -1,9 +1,10 @@
+import { getPetAssets } from "@/lib/assets";
 import { getGitHubProfile } from "@/lib/github";
 import { INITIAL_PET, updatePet, type PetAction, type PetState } from "@/lib/pet";
 
 export async function GET() {
-  const profile = await getGitHubProfile();
-  return Response.json({ pet: INITIAL_PET, profile });
+  const [profile] = await Promise.all([getGitHubProfile()]);
+  return Response.json({ pet: INITIAL_PET, profile, assets: getPetAssets() });
 }
 
 export async function POST(request: Request) {
