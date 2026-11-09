@@ -1,52 +1,85 @@
-export type GitHubProfile = {
-  login: string;
-  name: string | null;
-  avatarUrl: string;
-  htmlUrl: string;
-  publicRepos: number;
-  followers: number;
+type ContributionDay = {
+  contributionCount: number;
+  date: string;
 };
 
-type GitHubUserResponse = {
-  login: string;
-  name: string | null;
-  avatar_url: string;
-  html_url: string;
-  public_repos: number;
-  followers: number;
+type ContributionCalendar = {
+  weeks: { contributionDays: ContributionDay[] }[];
 };
 
-export async function getGitHubProfile(): Promise<GitHubProfile | null> {
-  const username = process.env.GITHUB_USERNAME?.trim();
-  const token = process.env.GITHUB_TOKEN;
-  if (!username && !token) return null;
-
-  const headers: HeadersInit = {
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
+type GraphQLUser = {
+  contributionsCollection: {
+    contributionCalendar: ContributionCalendar;
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
+};
 
-  try {
-    const endpoint = username
-      ? `/users/${encodeURIComponent(username)}`
-      : "/user";
-    const response = await fetch(`https://api.github.com${endpoint}`, {
-      headers,
-      next: { revalidate: 3600 },
-    });
-    if (!response.ok) return null;
+type GraphQLResponse = {
+  data?: {
+    user?: GraphQLUser | null;
+    viewer?: GraphQLUser;
+  };
+  errors?: { message: string }[];
+};
 
-    const user = (await response.json()) as GitHubUserResponse;
-    return {
-      login: user.login,
-      name: user.name,
-      avatarUrl: user.avatar_url,
-      htmlUrl: user.html_url,
-      publicRepos: user.public_repos,
-      followers: user.followers,
-    };
-  } catch {
-    return null;
+const CONTRIBUTION_FIELDS = `
+  contributionsCollection {
+    contributionCalendar {
+      weeks {
+        contributionDays {
+          contributionCount
+          date
+        }
+      }
+    }
   }
+`;
+
+export async function getGitHubStats(username = process.env.GITHUB_USERNAME?.trim()) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN is not configured.");
+
+  const query = username
+    ? `query($login: String!) { user(login: $login) { ${CONTRIBUTION_FIELDS} } }`
+    : `query { viewer { ${CONTRIBUTION_FIELDS} } }`;
+
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query,
+      ...(username ? { variables: { login: username } } : {}),
+    }),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) throw new Error(`GitHub GraphQL request failed (${response.status}).`);
+
+  const result = (await response.json()) as GraphQLResponse;
+  if (result.errors?.length) throw new Error("GitHub GraphQL returned an error.");
+
+  const user = username ? result.data?.user : result.data?.viewer;
+  const days = user?.contributionsCollection.contributionCalendar.weeks.flatMap(
+    (week) => week.contributionDays,
+  );
+  if (!days) throw new Error("GitHub did not return contribution data.");
+
+  return { currentStreak: calculateCurrentStreak(days) };
+}
+
+export function calculateCurrentStreak(days: ContributionDay[]): number {
+  const newestFirst = [...days].reverse();
+  if (newestFirst.length === 0) return 0;
+
+  const startIndex = newestFirst[0].contributionCount === 0 ? 1 : 0;
+  let streak = 0;
+
+  for (let index = startIndex; index < newestFirst.length; index += 1) {
+    if (newestFirst[index].contributionCount === 0) break;
+    streak += 1;
+  }
+
+  return streak;
 }

@@ -1,20 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const ASSET_FILENAMES = {
-  sleepingCat: "sleeping_cat.png",
-  awakeCat: "awake_cat.png",
-  fish: "fish.png",
-} as const;
-
-export type PetAssets = Record<keyof typeof ASSET_FILENAMES, string | null>;
-
-export function getPetAssets(): PetAssets {
-  const assetDirectory = path.join(process.cwd(), "public", "assets");
-  return Object.fromEntries(
-    Object.entries(ASSET_FILENAMES).map(([name, filename]) => [
-      name,
-      fs.existsSync(path.join(assetDirectory, filename)) ? `/assets/${filename}` : null,
-    ]),
-  ) as PetAssets;
+function toBase64(filePath: string): string | null {
+  if (!fs.existsSync(filePath)) return null;
+  return `data:image/png;base64,${fs.readFileSync(filePath).toString("base64")}`;
 }
+
+const assetDirectory = path.join(process.cwd(), "public", "assets");
+
+export const ASSETS = {
+  sleepingCat: toBase64(path.join(assetDirectory, "sleeping_cat.png")),
+  awakeCat: toBase64(path.join(assetDirectory, "awake_cat.png")),
+  fish: toBase64(path.join(assetDirectory, "fish.png")),
+};

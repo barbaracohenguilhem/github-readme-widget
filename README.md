@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Profile Pet
 
-## Getting Started
+A Next.js API route that returns a self-contained SVG showing your current GitHub contribution streak. The cat is awake while the streak is active and sleeps when it reaches zero.
 
-First, run the development server:
+## Configure
+
+Copy `.env.example` to `.env` and set `GITHUB_TOKEN`. Optionally set `GITHUB_USERNAME` to query a specific account; without it, the widget uses the token's authenticated account.
+
+Use a GitHub token with permission to read the selected account's contribution data. Keep `.env` local and never commit the token. If a token has been shared in chat or another public place, revoke it and create a replacement.
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` to preview the widget. The SVG is served from `/api/pet`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Add artwork
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Place these optional files in `public/assets/`:
 
-## Learn More
+- `sleeping_cat.png`
+- `awake_cat.png`
+- `fish.png`
 
-To learn more about Next.js, take a look at the following resources:
+The endpoint embeds available PNGs as Base64 data URLs. If an image is missing, it draws a small SVG fallback instead.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Embed in a profile README
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After deploying the app, add an image tag to your GitHub profile README and replace the example host with your deployment URL:
 
-## Deploy on Vercel
+```html
+<img src="https://your-domain.vercel.app/api/pet" alt="GitHub contribution streak" />
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The endpoint caches GitHub contribution data for one hour.
