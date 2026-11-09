@@ -27,20 +27,24 @@ export async function GET() {
 
 function renderPetSvg(currentStreak: number, pet: ReturnType<typeof getPetState>) {
   const cat = pet.asset
-    ? `<image href="${pet.asset}" x="40" y="110" width="250" height="210" preserveAspectRatio="xMidYMid meet" />`
+    ? `<image href="${pet.asset}" x="65" y="132" width="200" height="176" preserveAspectRatio="xMidYMid meet" />`
     : renderFallbackCat(pet.sleeping);
   const fish = ASSETS.fish
-    ? `<image href="${ASSETS.fish}" x="226" y="105" width="72" height="52" preserveAspectRatio="xMidYMid meet" />`
+    ? `<image href="${ASSETS.fish}" x="244" y="113" width="58" height="43" preserveAspectRatio="xMidYMid meet" />`
     : renderFallbackFish();
+  const streakLabel = currentStreak === 1 ? "day" : "days";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="330" height="330" viewBox="0 0 330 330" role="img" aria-labelledby="title description">
-  <title id="title">GitHub contribution streak: ${currentStreak} days</title>
+  <title id="title">GitHub contribution streak: ${currentStreak} ${streakLabel}</title>
   <desc id="description">A ${pet.sleeping ? "sleeping" : "happy"} cat with a ${currentStreak}-day GitHub contribution streak.</desc>
-  <rect width="330" height="330" rx="18" fill="#f7f5ef" />
-  <circle cx="278" cy="47" r="24" fill="#f1cf70" />
-  <text x="28" y="42" fill="#456b55" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1.2">GITHUB CONTRIBUTION STREAK</text>
-  <text x="28" y="92" fill="#202c27" font-family="Georgia, serif" font-size="42" font-weight="700">${currentStreak}</text>
-  <text x="94" y="91" fill="#78817b" font-family="Arial, sans-serif" font-size="15">${currentStreak === 1 ? "day" : "days"}</text>
+  <rect width="330" height="330" rx="18" fill="#f3f6ef" />
+  <path d="M0 208Q84 174 165 205T330 195V330H0Z" fill="#e2eee4" />
+  <circle cx="165" cy="222" r="73" fill="#f8e9d8" />
+  <circle cx="282" cy="46" r="22" fill="#f1cf70" />
+  <path d="m274 46 8-15 8 15-8 15Z" fill="#fff7de" />
+  <text x="27" y="39" fill="#456b55" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.1">GITHUB CONTRIBUTION STREAK</text>
+  <text x="27" y="91" fill="#202c27" font-family="Georgia, serif" font-size="48" font-weight="700">${currentStreak}</text>
+  <text x="80" y="90" fill="#78817b" font-family="Arial, sans-serif" font-size="14">${streakLabel}</text>
   ${cat}
   ${fish}
   </svg>`;
@@ -48,25 +52,30 @@ function renderPetSvg(currentStreak: number, pet: ReturnType<typeof getPetState>
 
 function renderFallbackCat(sleeping: boolean) {
   const eyes = sleeping
-    ? '<path d="M124 197q8 8 16 0m26 0q8 8 16 0" fill="none" stroke="#34443b" stroke-width="4" stroke-linecap="round" />'
-    : '<ellipse cx="132" cy="196" rx="4" ry="7" fill="#34443b"/><ellipse cx="174" cy="196" rx="4" ry="7" fill="#34443b"/>';
-  return `<g transform="translate(34 100)">
-    <ellipse cx="154" cy="194" rx="89" ry="42" fill="#d9825f" />
-    <path d="M89 151 94 93 133 122Q154 114 176 122L214 93 219 153Q233 169 229 192H79Q75 169 89 151Z" fill="#e99a70" />
-    <path d="m99 118 3-43 29 31m53 0 29-31 3 43" fill="#e99a70" stroke="#c96d54" stroke-width="5" stroke-linejoin="round" />
-    <path d="m107 110 1-19 13 14m66 0 13-14 1 19" fill="#f3c1a2" />
+    ? '<path d="M143 197q7 7 14 0m25 0q7 7 14 0" fill="none" stroke="#34443b" stroke-width="3" stroke-linecap="round" />'
+    : '<ellipse cx="151" cy="197" rx="3.5" ry="6" fill="#34443b"/><ellipse cx="188" cy="197" rx="3.5" ry="6" fill="#34443b"/>';
+  return `<g>
+    <path d="M116 250Q81 273 87 243Q90 229 106 230" fill="none" stroke="#c96d54" stroke-width="9" stroke-linecap="round" />
+    <ellipse cx="169" cy="247" rx="61" ry="34" fill="#d9825f" />
+    <path d="M119 201 124 151Q125 144 132 149L154 170Q169 165 183 170L205 149Q212 144 213 151L218 201Q218 237 169 240Q119 237 119 201Z" fill="#e99a70" />
+    <path d="m127 163 2-23 20 19m61 4-2-23-20 19" fill="#e99a70" stroke="#c96d54" stroke-width="4" stroke-linejoin="round" />
+    <path d="m132 158 1-10 10 9m50 0 10-9 1 10" fill="#f3c1a2" />
     ${eyes}
-    <path d="m148 211 6 5 6-5m-6 5q-7 8-14 1m14-1q7 8 14 1" fill="none" stroke="#a95d4b" stroke-width="3" stroke-linecap="round" />
-    <path d="M77 189q-28-7-32 13m185-13q27-7 31 13" fill="none" stroke="#c96d54" stroke-width="8" stroke-linecap="round" />
-    ${sleeping ? '<text x="222" y="76" fill="#456b55" font-family="Georgia, serif" font-size="22">Zzz</text>' : ""}
+    <path d="m164 207 5 4-5 4-5-4Z" fill="#a95d4b" />
+    <path d="M164 215q-6 7-12 1m12-1q6 7 12 1" fill="none" stroke="#a95d4b" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M132 210 105 205m27 13-27 4m93-12 27-5m-27 13 27 4" fill="none" stroke="#a95d4b" stroke-width="2" stroke-linecap="round" />
+    <ellipse cx="145" cy="269" rx="15" ry="8" fill="#f3c1a2" />
+    <ellipse cx="193" cy="269" rx="15" ry="8" fill="#f3c1a2" />
+    ${sleeping ? '<text x="222" y="174" fill="#456b55" font-family="Georgia, serif" font-size="18">Zzz</text>' : '<path d="m105 167 4-7 4 7m112 0 4-7 4 7" fill="none" stroke="#fff7de" stroke-width="3" stroke-linecap="round" />'}
   </g>`;
 }
 
 function renderFallbackFish() {
-  return `<g transform="translate(244 113) rotate(-12)">
-    <ellipse cx="20" cy="15" rx="22" ry="12" fill="#78a9a0" />
-    <path d="m38 15 15-12v24Z" fill="#e68a5b" />
-    <circle cx="11" cy="12" r="2" fill="#202c27" />
+  return `<g transform="translate(252 113) rotate(-10)">
+    <ellipse cx="17" cy="13" rx="17" ry="10" fill="#78a9a0" />
+    <path d="m31 13 13-10v20Z" fill="#e68a5b" />
+    <circle cx="10" cy="11" r="1.7" fill="#202c27" />
+    <path d="M5 22q12 4 23 0" fill="none" stroke="#5d9086" stroke-width="2" stroke-linecap="round" />
   </g>`;
 }
 
